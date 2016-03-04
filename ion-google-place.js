@@ -27,7 +27,7 @@ angular.module('ion-google-place', [])
 
                     scope.displayCurrentLocation = false;
                     scope.currentLocation = scope.currentLocation === "true"? true:false;
-                    
+
                     if(!!navigator.geolocation && scope.currentLocation){
                         scope.displayCurrentLocation = true;
                     }
@@ -45,7 +45,7 @@ angular.module('ion-google-place', [])
                             '<ion-content class="has-header has-header">',
                                 '<ion-list>',
                                     '<ion-item type="item-text-wrap" ng-click="setCurrentLocation()" ng-if="displayCurrentLocation">',
-                                        'Use current location',
+                                        attrs.labelCurrentLocation || 'Use current location',
                                     '</ion-item>',
                                     '<ion-item ng-repeat="location in locations" type="item-text-wrap" ng-click="selectLocation(location)">',
                                         '{{location.formatted_address}}',
@@ -61,8 +61,15 @@ angular.module('ion-google-place', [])
                         appendTo: $document[0].body
                     });
 
+                    var modalEl = null
+                    var searchInputElement = null
+
                     popupPromise.then(function(el){
-                        var searchInputElement = angular.element(el.element.find('input'));
+                        modalEl = el
+                        searchInputElement = angular.element(el.element.find('input'));
+                        if(!attrs.displayOnInit) {
+                            el.element.css('display', 'none');
+                        }
 
                         scope.selectLocation = function(location){
                             ngModel.$setViewValue(location);
@@ -77,45 +84,6 @@ angular.module('ion-google-place', [])
                             scope.$emit('ionGooglePlaceSetLocation',location);
                         };
 
-                        scope.setCurrentLocation = function(){
-                            var location = {
-                                formatted_address: 'getting current location...'
-                            };
-                            ngModel.$setViewValue(location);
-                            ngModel.$render();
-                            el.element.css('display', 'none');
-                            $ionicBackdrop.release();
-                            getLocation()
-                                .then(reverseGeocoding)
-                                .then(function(location){
-                                    ngModel.$setViewValue(location);
-                                    element.attr('value', location.formatted_address);
-                                    ngModel.$render();
-                                    el.element.css('display', 'none');
-                                    $ionicBackdrop.release();
-                                })
-                                .catch(function(error){
-                                    console.log('erreur catch',error);
-                                    //if(error.from == 'getLocation'){
-                                    //    getLocationError(error);
-                                    //} else {
-                                    //    //TODO when error from reverse geocode
-                                    //}
-                                    var location = {
-                                        formatted_address: 'Error in getting current location'
-                                    };
-                                    ngModel.$setViewValue(location);
-                                    ngModel.$render();
-                                    el.element.css('display', 'none');
-                                    $ionicBackdrop.release();
-                                    $timeout(function(){
-                                        ngModel.$setViewValue(null);
-                                        ngModel.$render();
-                                        el.element.css('display', 'none');
-                                        $ionicBackdrop.release();
-                                    }, 2000);
-                                });
-                        };
 
                         scope.$watch('searchQuery', function(query){
                             if (searchEventTimeout) $timeout.cancel(searchEventTimeout);
@@ -180,6 +148,47 @@ angular.module('ion-google-place', [])
                         el.element.find('button').bind('click', onCancel);
                     });
 
+                    scope.setCurrentLocation = function(){
+                        var location = {
+                            formatted_address: attrs.labelGettingCurrentLocation || 'getting current location...'
+                        };
+                        console.log('location', location)
+                        ngModel.$setViewValue(location);
+                        ngModel.$render();
+                        if(modalEl) {modalEl.element.css('display', 'none');}
+                        $ionicBackdrop.release();
+                        getLocation()
+                            .then(reverseGeocoding)
+                            .then(function(location){
+                                ngModel.$setViewValue(location);
+                                element.attr('value', location.formatted_address);
+                                ngModel.$render();
+                                if(modalEl) {modalEl.element.css('display', 'none');}
+                                $ionicBackdrop.release();
+                            })
+                            .catch(function(error){
+                                console.log('erreur catch',error);
+                                //if(error.from == 'getLocation'){
+                                //    getLocationError(error);
+                                //} else {
+                                //    //TODO when error from reverse geocode
+                                //}
+                                var location = {
+                                    formatted_address: 'Error in getting current location'
+                                };
+                                ngModel.$setViewValue(location);
+                                ngModel.$render();
+                                if(modalEl) {modalEl.element.css('display', 'none');}
+                                $ionicBackdrop.release();
+                                $timeout(function(){
+                                    ngModel.$setViewValue(null);
+                                    ngModel.$render();
+                                    if(modalEl) {modalEl.element.css('display', 'none');}
+                                    $ionicBackdrop.release();
+                                }, 2000);
+                            });
+                    };
+
                     if(attrs.placeholder){
                         element.attr('placeholder', attrs.placeholder);
                     }
@@ -242,6 +251,11 @@ angular.module('ion-google-place', [])
                                 }
                             })
                         });
+                    }
+
+
+                    if(attrs.useCurrentOnInit == 'true') {
+                        scope.setCurrentLocation()
                     }
                 }
             };
