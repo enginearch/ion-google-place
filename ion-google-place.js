@@ -169,14 +169,13 @@ angular.module('ion-google-place', [])
                             })
                             .catch(function(error){
                                 console.log('erreur catch',error);
-                                alert(error)
                                 //if(error.from == 'getLocation'){
                                 //    getLocationError(error);
                                 //} else {
                                 //    //TODO when error from reverse geocode
                                 //}
                                 var location = {
-                                    formatted_address: 'Error in getting current location'
+                                    formatted_address: attrs.labelCantGetLocation || 'Error in getting current location'
                                 };
                                 ngModel.$setViewValue(location);
                                 ngModel.$render();
