@@ -7,7 +7,8 @@ angular.module('ion-google-place', [])
         '$timeout',
         '$rootScope',
         '$document',
-        function($ionicTemplateLoader, $ionicBackdrop, $ionicPlatform, $q, $timeout, $rootScope, $document) {
+        '$cordovaGeolocation',
+        function($ionicTemplateLoader, $ionicBackdrop, $ionicPlatform, $q, $timeout, $rootScope, $document, $cordovaGeolocation) {
             return {
                 require: '?ngModel',
                 restrict: 'E',
@@ -219,14 +220,18 @@ angular.module('ion-google-place', [])
                     });
 
                     function getLocation() {
-                        return $q(function (resolve, reject) {
-                            navigator.geolocation.getCurrentPosition(function (position) {
-                                resolve(position);
-                            }, function (error) {
-                                error.from = 'getLocation';
-                                reject(error);
-                            });
-                        });
+                        // return $q(function (resolve, reject) {
+                        //     navigator.geolocation.getCurrentPosition(function (position) {
+                        //         resolve(position);
+                        //     }, function (error) {
+                        //         error.from = 'getLocation';
+                        //         reject(error);
+                        //     });
+                        // });
+                        return $cordovaGeolocation.getCurrentPosition({
+                            timeout: 10000,
+                            enableHighAccuracy: false
+                        })
                     }
 
                     function reverseGeocoding(location) {
