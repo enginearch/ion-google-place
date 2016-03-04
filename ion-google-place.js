@@ -169,6 +169,7 @@ angular.module('ion-google-place', [])
                             })
                             .catch(function(error){
                                 console.log('erreur catch',error);
+                                alert(error)
                                 //if(error.from == 'getLocation'){
                                 //    getLocationError(error);
                                 //} else {
@@ -220,18 +221,18 @@ angular.module('ion-google-place', [])
                     });
 
                     function getLocation() {
-                        // return $q(function (resolve, reject) {
-                        //     navigator.geolocation.getCurrentPosition(function (position) {
-                        //         resolve(position);
-                        //     }, function (error) {
-                        //         error.from = 'getLocation';
-                        //         reject(error);
-                        //     });
-                        // });
-                        return $cordovaGeolocation.getCurrentPosition({
-                            timeout: 10000,
-                            enableHighAccuracy: false
-                        })
+                        return $q(function (resolve, reject) {
+                            navigator.geolocation.getCurrentPosition(function (position) {
+                                resolve(position);
+                            }, function (error) {
+                                error.from = 'getLocation';
+                                reject(error);
+                            }, {
+                                enableHighAccuracy: false,
+                                timeout: 10000,
+                                maximumAge: 60000
+                            });
+                        });
                     }
 
                     function reverseGeocoding(location) {
