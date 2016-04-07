@@ -8,7 +8,7 @@ angular.module('ion-google-place', [])
         '$rootScope',
         '$document',
         '$cordovaGeolocation',
-        function($ionicTemplateLoader, $ionicBackdrop, $ionicPlatform, $q, $timeout, $rootScope, $document, $cordovaGeolocation, $filter) {
+        function($ionicTemplateLoader, $ionicBackdrop, $ionicPlatform, $q, $timeout, $rootScope, $document, $cordovaGeolocation, $filter, $log) {
             return {
                 require: '?ngModel',
                 restrict: 'E',
@@ -21,6 +21,7 @@ angular.module('ion-google-place', [])
                 },
                 link: function(scope, element, attrs, ngModel) {
                     var unbindBackButtonAction;
+
 
                     scope.locations = [];
                     var geocoder = new google.maps.Geocoder();
@@ -194,7 +195,7 @@ angular.module('ion-google-place', [])
 
                             })
                             .catch(function(error){
-                                console.log('error fetching position',error);
+                                $log.error('error fetching position',error);
                                 //if(error.from == 'getLocation'){
                                 //    getLocationError(error);
                                 //} else {
@@ -295,6 +296,14 @@ angular.module('ion-google-place', [])
                     if(attrs.useCurrentOnInit == 'true') {
                         scope.setCurrentLocation()
                     }
+
+                    $timeout(function(){
+                        if (ngModel.$modelValue) {
+                            ngModel.$setViewValue(ngModel.$modelValue);
+                            element.attr('value', ngModel.$modelValue.formatted_address);
+                            ngModel.$render();
+                        }
+                    });
                 }
             };
         }
