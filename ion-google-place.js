@@ -8,6 +8,8 @@ angular.module('ion-google-place', [])
         '$rootScope',
         '$document',
         '$cordovaGeolocation',
+        '$filter',
+        '$log',
         function($ionicTemplateLoader, $ionicBackdrop, $ionicPlatform, $q, $timeout, $rootScope, $document, $cordovaGeolocation, $filter, $log) {
             return {
                 require: '?ngModel',
